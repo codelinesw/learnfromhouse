@@ -51,8 +51,9 @@ export default class ViewCourse extends React.Component{
 
 	render(){
 
-		const { location, isLoaded  } = this.props;
-		
+		const { location, isLoaded, match  } = this.props;
+		let course = (location.state === undefined) ? {color:'bg-s'} : location.state.course;
+
 		return(
 			<div>
 				<Header currentSection="cursos" />
@@ -73,7 +74,7 @@ export default class ViewCourse extends React.Component{
 									</div>
 								</div>
 								<div className="card-body p-0">
-									<SideBar state_={this.props.location.state} current="Posts" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/'}} />
+									<SideBar state_={this.props.location.state} current="Posts" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/',four:'/evaluations/'}} />
 								</div>
 							</div>
 						</div>
@@ -81,8 +82,8 @@ export default class ViewCourse extends React.Component{
 							<div className="row mt-2 mb-2">
 								<div className="card bg-white w-92 ml-4">
 									<div className="card-header bg-white border-bottom-0">
-										<div className={"bd-callout b-"+location.state.course.color.split('-')[1]+'-'+location.state.course.color.split('-')[2]}>
-											<h4 className="text-dark">{location.state.course.c_name.replace(/\-/g,' ')}</h4>
+										<div className={`bd-callout b-${course.color.split('-')[1]}-${course.color.split('-')[2]}`}>
+											<h4 className="text-dark">{match.params.course.replace(/\-/g,' ')}</h4>
 											<p className="card-text text-black-50" style={{marginTop: '-9px'}}>Docente - Carolina Gonzales Velasco | Jornada nocturna | Grado 9</p>
 										</div>
 										<p className="card-text text-secondary mt-1">Some quick example text to build on the card title and make up the bulk of the card's content.</p>

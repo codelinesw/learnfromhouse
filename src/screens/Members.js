@@ -36,7 +36,9 @@ class Members extends React.Component{
       	search:'',
       	route:routes.inscriptions.listforinstitution,
       	indexStudent:'0',
-      	studentId:'0'
+      	studentId:'0',
+      	selectedMember:['']
+
 	  };
 
 	  this.isMounted_ = false;
@@ -109,15 +111,17 @@ class Members extends React.Component{
     	ev.preventDefault();
     	this.isMounted_ = true;
     	let this_ = ev.target;
-    	ev.target.parentElement.children[0].classList.add('hide');
-    	ev.target.parentElement.children[1].classList.add('show');
-    	console.log(this_.parentElement.parentElement.parentElement);
-    	if(id !== undefined || id > 0 || id !== null){
+    	if(!Array.isArray(id)){
+    		ev.target.parentElement.children[0].classList.add('hide');
+    		ev.target.parentElement.children[1].classList.add('show');
+    	}
+
+    	if(id !== undefined || id > 0 || id !== null || (Array.isArray(id) && id[0] !== '')){
     		let data = JSON.stringify({studentid:id,courseid:this.props.location.state.course.courseId});
     		services.requestSet(routes.inscriptions.add,data)
     		.then(res => {
+    			console.log(res);
 			      if(this.isMounted_){
-			      	console.log(res);
 			      	if(res !== 'failed'){
 			      		Swal.fire(
 						  'Buen trabajo!',
@@ -140,14 +144,15 @@ class Members extends React.Component{
 		    }).finally(() => {
 
 		     if(this.isMounted_){
-				 this.setState({isLoaded: false});
+				 this.setState({isLoaded: false,selectedMember:['']});
 		      	 this.isMounted_ = false;
-		      	 this_.parentElement.children[0].classList.remove('hide');
-		      	 this_.parentElement.children[0].classList.add('show');
-		      	 this_.parentElement.children[1].classList.remove('hide');
-    			 this_.parentElement.children[1].classList.add('hide');
+		      	 if(!Array.isArray(id)){
+		      	 	 this_.parentElement.children[0].classList.remove('hide');
+			      	 this_.parentElement.children[0].classList.add('show');
+			      	 this_.parentElement.children[1].classList.remove('hide');
+	    			 this_.parentElement.children[1].classList.add('hide');
+		      	 }
     			 this.props.DeleteStudent(item);
-    			 console.log(this_.parentElement.parentElement.parentElement);
 		      }
 		    }).catch(function(error) {
 		      alert(
@@ -162,9 +167,22 @@ class Members extends React.Component{
     	}
     }
 
+    chooseMember(ev,index,id){
+    	var newdata = [...this.state.selectedMember]; // make a separate copy of the array
+    	let selectedMember = this.state.selectedMember;
+    	if(selectedMember[0] === ''){
+    		newdata[0] = {id:id,checked:ev.target.checked,index:index};
+    		this.setState({selectedMember:newdata});
+    	}else{
+    		newdata.push({id:id,checked:ev.target.checked,index:index});
+    		this.setState({selectedMember:newdata});
+    	}
+	
+    }
+
     delete(){
    		const { indexStudent , studentId } = this.state;
-	   	if(studentId === '0'){
+	   	if(studentId === '0' || (Array.isArray(studentId) && studentId[0] === '')){
 	   		console.log('undefined id data');
 	   	}else{
 	   		let data_ = JSON.stringify({studentid:studentId});
@@ -210,16 +228,17 @@ class Members extends React.Component{
    }
 
 	_renderItems_(item,index){
-		console.log(item);
+		//console.log(item);
 		if(item === "" || item === "undefined" || item === null){
 			return(<tr key={index+1}><td className="text-muted"></td></tr>);
 		}else{
 			if(Object.values(item)[0] === "empty"){
-				return(<tr key={index+1}><th scope="row"></th><td></td><td>No existen estudiantes registrados</td><td></td></tr>);
+				return(<tr key={index+1}><th scope="row"></th><td></td><td>No existen estudiantes registrados</td><td></td><td></td><td></td><td></td></tr>);
 			}else{
+				let id_ = (item.i_inscription_id === undefined || item.i_inscription_id === null) ? item.us_user_information_id : item.i_inscription_id;
 				return(
 			        <tr key={index+1}>
-			        	<td className="p-1"><input type="checkbox" aria-label="Checkbox for following text input" className="ml-1 mt-3" /></td>
+			        	<td className="p-1"><input type="checkbox" aria-label="Checkbox for following text input" className="ml-1 mt-3 checkbox-item" onClick={(ev) => this.chooseMember(ev,index,id_)} /></td>
 						<td scope="row">{index+1}</td>
 						<td><div className="row d-flex ml-1">
 							<img src="https://pngimage.net/wp-content/uploads/2018/06/user-png-image-5.png" width="35" height="35" />
@@ -243,7 +262,7 @@ class Members extends React.Component{
 										</div>
 									</div>
 								</div>
-								: <div className="input-group" role="group" aria-label="Basic example" onClick={() => this.deleteData(index,item.us_user_information_id,'#modalQuestionForMembers')}>
+								: <div className="input-group" role="group" aria-label="Basic example" onClick={() => this.deleteData(index,id_,'#modalQuestionForMembers')}>
 									<button type="button" className="btn btn-outline-danger">Dar de baja</button>
 								</div>
 							}
@@ -376,12 +395,13 @@ class Members extends React.Component{
 
    deleteData(index,id,idElement){
    	  let currentData = this.props.students.students;
+   	  let usname = (Array.isArray(id) && id[0] !== '') ? id : currentData[index].us_name ;
 	  this.setState({
 	  	studentId:id,
 	  	indexStudent:index,
-	  	t_name:currentData[index].us_name
+	  	t_name:usname
 	  });
-	  console.log(currentData[index].us_name);
+	  console.log(usname);
    	  this.showingModal(idElement);
    }
 
@@ -437,6 +457,25 @@ class Members extends React.Component{
 	   	}
    }
 
+   showDropDown(ev){
+   	ev.preventDefault();
+   	document.querySelector('.dropdown-members').classList.toggle('show');
+   }
+
+   removeCheckedInputs(elements){
+   	[].forEach.call(elements, input => {
+		if(input.checked){
+			input.checked = false;
+		}
+	});
+   }
+
+   inscriptions_(ev){
+   	ev.preventDefault();
+   	this.removeCheckedInputs(document.querySelectorAll('.checkbox-item'));
+   	this.enrollstudent(ev,this.state.selectedMember,this.state.selectedMember);
+   }
+
 	render(){
 		const { isLoaded, t_name, isloading, search , route , loadCountotal, page, isloaded_  } = this.state;
 		const { location } = this.props;
@@ -460,7 +499,7 @@ class Members extends React.Component{
 									</div>
 								</div>
 								<div className="card-body p-0">
-									<SideBar state_={this.props.location.state} current="Members" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/'}} />
+									<SideBar state_={this.props.location.state} current="Members" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/',four:'/evaluations/'}} />
 								</div>
 							</div>
 						</div>
@@ -483,6 +522,18 @@ class Members extends React.Component{
 								<div className="card m-auto" style={{maxWidth:'900px',width:'900px'}}>
 									<div className="card-header bg-transparent d-flex justify-content-between">
 										<h5 className="card-title">Listado de miembros del curso</h5>
+										<div className="input-group" style={{width:'460px'}}>
+											<button type="button" className="btn btn-dark mr-2">Seleccionar todos</button>
+											<button type="button" className="btn btn-dark mr-2">Anular la seleccion</button>
+											<div className="dropdown">
+											  <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onClick={(ev) => this.showDropDown(ev)}>
+											  Acciones
+											  </button>
+											  <div className="dropdown-menu dropdown-members" aria-labelledby="dropdownMenuButton" style={{minWidth:'7rem'}}>
+											   {route !== routes.inscriptions.listforinstitution ?  <button type="button" className="dropdown-item" onClick={(ev) => this.inscriptions_(ev)}>Inscribir</button> :  <button type="button" className="dropdown-item" onClick={(ev) => this.deleteData(this.state.selectedMember,this.state.selectedMember,'#modalQuestionForMembers')}>Dar de alta</button>}
+											  </div>
+											</div>
+										</div>
 									</div>
 									<ul className="nav nav-tabs">
 									  <li className="nav-item">
@@ -496,14 +547,14 @@ class Members extends React.Component{
 										<div className="card p-1 border-0">
 											<div className="card-header p-1 border-0 bg-transparent">
 												<div className="d-flex justify-content-between">
-														<div className="column d-flex align-items-center col-md-2">
+														<div className="column d-flex align-items-center">
 															<p style={{position: 'relative', top: '5px'}}>Mostrar</p>
 															<select className="form-control ml-2" id="exampleFormControlSelect1" defaultValue="DEFAULT">
 																<option value="DEFAULT">10</option>
 																<option value="5">5</option>
 															</select>
 														</div>
-														<div className="input-group col-md-4">
+														<div className="input-group col-md-5">
 														  <input type="text" className="form-control" aria-label="Text input with segmented dropdown button" placeholder="Busca por el codigo" value={search} onChange={(text) => this.setState({search:text.target.value})} />
 														  <div className="input-group-append">
 														    <button type="button" className="btn btn-outline-secondary" onClick={(ev) => this.validateSearch(ev)}>Buscar</button>
@@ -574,16 +625,24 @@ class Members extends React.Component{
 						    <div className="modal-content">
 						      <div className="modal-header">
 						        <h5 className="modal-title">Eliminar Tarea</h5>
-						        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+						        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() =>this.hideModal('#modalQuestionForMembers')}>
 						          <span aria-hidden="true">&times;</span>
 						        </button>
 						      </div>
 						      <div className="modal-body">
-						        <p>¿Se encuentra seguro/a de dar de alta al estudiante <b>{t_name}</b> ?.</p>
+						       <div>
+						       		{ Array.isArray(t_name) ? <ul className="list-group">
+						       			<p>Esta seguro/a que deseas borrar los siguientes estudiantes:</p>
+						       			{t_name.map((item, index) => {
+						       				return <li className="list-group-item border-0 p-0 d-flex" key={index+1}><i className="far fa-user text-dark mr-2 mb-1" style={{fontsize:'13px'}}></i> <p className="text-dark mb-1" style={{fontSize:'13px'}}>{this.props.students.students[item.index] === undefined ? '' : this.props.students.students[item.index].us_name}</p></li>;
+						       			})}
+						       			</ul> : <p>¿Se encuentra seguro/a de dar de alta al estudiante <b>{t_name}</b> ?.</p> }
+						       </div>
+						        
 						      </div>
 						      <div className="modal-footer">
 						        <button type="button" className="btn btn-primary" onClick={() => this.delete()}>Aceptar</button>
-						        <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() =>this.hideModal('#modalQuestionForInstitution')}>Cancelar</button>
+						        <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() =>this.hideModal('#modalQuestionForMembers')}>Cancelar</button>
 						      </div>
 						      {isloaded_ ? <div className="container_circle_preloader">
 			               <div className="child_container_">

@@ -27,7 +27,7 @@ class SideBar extends React.Component{
 	render(){
 		
 		const { path , state_, current } = this.props;
-
+		
 		return(
 			<ul className="nav flex-column mt-2">
 				<li className={(current === 'Posts') ? 'nav-item white d-flex mb-1' : 'nav-item d-flex mb-1'}>
@@ -36,7 +36,7 @@ class SideBar extends React.Component{
 						course:state_.course.c_name.replace(/\s/g,'-'),
 						state:{
 							course:{courseId:state_.course.courseId,c_name:state_.course.c_name.replace(/\s/g,'-'),color:state_.course.color}
-					}
+						}
 					}} className={(current === 'Posts') ? 'nav-link text-dark font-weight-bold position-relative' : 'nav-link text-muted position-relative'} >Publicaciones</Link>
 				</li>
 				<li className={(current === 'Tasks') ? 'nav-item white d-flex mb-1' : 'nav-item d-flex mb-1'}>
@@ -57,11 +57,14 @@ class SideBar extends React.Component{
 						}
 					}} className={(current === 'Members') ? 'nav-link text-dark font-weight-bold  position-relative' : 'nav-link text-muted position-relative'}>Miembros</Link>
 				</li>
-				<li className="nav-item">
-					<a className="nav-link text-muted" href="#">Activades</a>
-				</li>
-				<li className="nav-item">
-					<a className="nav-link text-muted" href="#">Examenes</a>
+				<li className={(current === 'Evaluations') ? 'nav-item white d-flex mb-1' : 'nav-item d-flex mb-1'}>
+					<Link to={{
+						pathname:path.four+state_.course.c_name.replace(/\s/g,'-')+"/",
+						course:state_.course.c_name.replace(/\s/g,'-'),
+						state: {
+							course:{courseId:state_.course.courseId,c_name:state_.course.c_name.replace(/\s/g,'-'),color:state_.course.color}
+						}
+					}} className={(current === 'Evaluations') ? 'nav-link text-dark font-weight-bold  position-relative' : 'nav-link text-muted position-relative'}>Examenes</Link>
 				</li>
 			</ul>
 		)

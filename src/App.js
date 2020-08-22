@@ -20,6 +20,10 @@ import AddUsers from './screens/AddUsers';
 import AddTasks from './screens/AddTasks';
 import Members from './screens/Members';
 import AddMembers from './screens/AddMembers';
+import Evaluations from './screens/Evaluations';
+import AddEvaluation from './screens/AddEvaluation';
+import AddQuestions from './screens/AddQuestions';
+import EvaluateTask from './screens/EvaluateTask';
 import { connect } from 'react-redux';
 import {
   login
@@ -55,7 +59,7 @@ class App extends React.Component{
             component={Courses}
           />
           <ProtectedRoute
-            path="/viewcourse"
+            path="/viewcourse/:course"
             isAuth={auth}
             component={ViewCourse}
           />
@@ -65,7 +69,7 @@ class App extends React.Component{
             component={Tasks}
           />
           <ProtectedRoute
-            path="/viewtask"
+            path="/viewtask/:task"
             isAuth={auth}
             component={ViewTask}
           />
@@ -109,6 +113,26 @@ class App extends React.Component{
             isAuth={auth}
             component={Members}
           />
+          <ProtectedRoute
+            path="/evaluations/"
+            isAuth={auth}
+            component={Evaluations}
+          />
+          <ProtectedRoute
+            path="/course/:course/addevaluation/"
+            isAuth={auth}
+            component={AddEvaluation}
+          />
+         <ProtectedRoute
+            path="/evaluation/:ev/addquestions/"
+            isAuth={auth}
+            component={AddQuestions}
+          />
+         <ProtectedRoute
+            path="/task/:id/addevaluation/"
+            isAuth={auth}
+            component={EvaluateTask}
+          />          
         </Switch>
       </Router>
   );

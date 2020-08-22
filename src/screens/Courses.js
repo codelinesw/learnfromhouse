@@ -113,11 +113,11 @@ class Courses extends React.Component{
     	if(this.isMounted_){
     		this.setState({isLoaded:true});
     	}
-    	let id = (sessionStorage.getItem('duct') ===  undefined || sessionStorage.getItem('duct') === null || sessionStorage.getItem('duct') === "undefined") ? 0 : JSON.parse(sessionStorage.getItem('duct'))[0].us;
-    	let data = JSON.stringify({us:id});
-    	services.requestGet(routes.courses.listId,data)
+    	let id = (sessionStorage.getItem('duct') ===  undefined || sessionStorage.getItem('duct') === null || sessionStorage.getItem('duct') === "undefined") ? 0 : JSON.parse(sessionStorage.getItem('duct'))[0];
+    	let data = JSON.stringify({us:id.us});
+    	let url = (id.r_rol_id.substring(12,13) == 1 || id.r_rol_id.substring(12,13) == 2 || id.r_rol_id.substring(12,13) == 4) ? routes.courses.listId : routes.courses.list;
+    	services.requestGet(url,data)
     	.then(res => {
-    				console.log(res);
 			      if(this.isMounted_){
 			      	console.log(res);
 			      	if(res !== 'failed'){
@@ -397,7 +397,7 @@ class Courses extends React.Component{
 	   			return(<div className="card rounded_10 shadow-sm mb-3 p-0 " style={{width:'368px',height: '160px'}} key={index+1}>
 						<div className={"card-header rtop_10 "+item.color} style={{height: '105px'}}>
 							<Link to={{
-								pathname:"/viewcourse/"+item.c_name.replace(/\s/g,'-')+'/',
+								pathname:`/viewcourse/${item.c_name.replace(/\s/g,'-')}/`,
 									course:item.c_name.replace(/\s/g,'-'),
 									state: {
 										course:{courseId:item.c_course_id,c_name:item.c_name.replace(/\s/g,'-'),color:item.color}

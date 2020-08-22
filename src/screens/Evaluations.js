@@ -14,7 +14,7 @@ import {
   addTasks,
   DeleteTask
 } from '../actions'
-class Tasks extends React.Component{
+class Evaluations extends React.Component{
 
 	constructor(props) {
 	  super(props);
@@ -148,7 +148,7 @@ class Tasks extends React.Component{
 						<th scope="row" style={{paddingTop:'16px'}}>{index+1}</th>
 						<td style={{fontsize:'12px',paddingTop:'15px'}}>
 							<Link to={{
-								pathname:`/viewtask/${item.t_tasks_id}`,
+								pathname:`/evaluation/${item.e_evaluation_id}/addquestions/`,
 								state: {
 									task:{
 										courseId:item.c_course_id,
@@ -157,9 +157,10 @@ class Tasks extends React.Component{
 							           	file:item.file_one
 							        }
 								}
-							}} className="text-dark">{item.t_name.length > 50 ? item.t_name.substring(0,50)+'...' : item.t_name}</Link></td>
+							}} className="text-dark">{item.title.length > 50 ? item.title.substring(0,50)+'...' : item.title}</Link></td>
 						<td style={{fontsize:'12px',paddingTop:'15px'}}>{this.getDate(item.startdate)}</td>
-						<td style={{fontsize:'12px',paddingTop:'15px'}}>{this.getDate(item.enddate)}</td>
+						<td style={{fontsize:'12px',paddingTop:'15px'}}>{item.timelimit}</td>
+						<td style={{fontsize:'12px',paddingTop:'15px'}}>{item.attempts}</td>
 						<td style={{fontsize:'12px',paddingTop:'15px'}}>
 							{ (this.getRole().r_rol_id.substring(12,13) == 4 || this.getRole().r_rol_id.substring(12,13) == 1 || this.getRole().r_rol_id.substring(12,13) == 2) ? 
 							<div className="input-group position-relative" style={{top:'-8px'}} role="group" aria-label="Basic example">
@@ -176,8 +177,8 @@ class Tasks extends React.Component{
 							           	  enddate:this.getDateToInput(item.enddate)
 							           }
 							        }
-							    }} className="btn btn-warning mr-3">Editar</Link>
-								<button type="button" className="btn btn-danger" onClick={(ev) => this.deleteData(index,item.t_tasks_id,'#modalQuestionForTask')}>Eliminar</button>
+							    }} className="btn btn-warning mr-3 p-1 pl-2 pr-3"><i className="fas fa-pen ml-1 position-relative" style={{left:'2px'}}></i></Link>
+								<button type="button" className="btn btn-danger p-1 pl-2 pr-3" onClick={(ev) => this.deleteData(index,item.t_tasks_id,'#modalQuestionForTask')}><i className="fas fa-times ml-2"></i></button>
 							</div>
 							: <div className="input-group position-relative" style={{top:'-8px'}}><Link to={{
 								pathname:`/viewtask/${item.t_tasks_id}`,
@@ -200,12 +201,13 @@ class Tasks extends React.Component{
 
 	LoadTasks(){
 		this.isMounted_ = true;
+		const { match } = this.props;
     	if(this.isMounted_){
     		this.setState({isLoaded:true});
     	}
-    	let id = (sessionStorage.getItem('duct') ===  undefined || sessionStorage.getItem('duct') === null || sessionStorage.getItem('duct') === "undefined") ? 0 : JSON.parse(sessionStorage.getItem('duct'))[0].t_teacher_id;
+    	let id = match.params ? (match.params.course) ? match.params.course : '0' : '0';
     	let data = JSON.stringify({c_course_id:this.state.courseId});
-    	services.requestGet(routes.tasks.listId,data)
+    	services.requestGet(routes.evaluation.listId,data)
     	.then(res => {
 			      if(this.isMounted_){
 			      	console.log(res);
@@ -333,7 +335,7 @@ class Tasks extends React.Component{
 									</div>
 								</div>
 								<div className="card-body p-0">
-									<SideBar state_={this.props.location.state} current="Tasks" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/',four:'/evaluations/'}} />
+									<SideBar state_={this.props.location.state} current="Evaluations" path={{one:'/viewcourse/',two:'/tasks/',three:'/members/',four:'/evaluations/'}} />
 								</div>
 							</div>
 						</div>
@@ -355,9 +357,9 @@ class Tasks extends React.Component{
 							<div className="row">
 								<div className="card m-auto" style={{maxWidth:'900px',width:'900px'}}>
 									<div className="card-header bg-transparent d-flex justify-content-between">
-										<h5 className="card-title">Listado de tareas</h5>
+										<h5 className="card-title">Listado de examenes</h5>
 										<Link to={{
-											pathname:"/addtask",
+											pathname:`/course/${this.state.courseId}/addevaluation/`,
 											state: {
 												action:'ADD',
 												task:{
@@ -370,16 +372,17 @@ class Tasks extends React.Component{
 													taskId:'0'
 												}
 											}}
-										} className="btn btn-secondary">Nueva tarea</Link>
+										} className="btn btn-secondary">Nuevo Examen</Link>
 									</div>
 									<div className="card-body p-3">
-										<table className="table">
+										<table className="table table-bordered">
 									  <thead>
 									    <tr>
 									      <th scope="col">#</th>
-									      <th scope="col">Tarea</th>
+									      <th scope="col">Examen</th>
 									      <th scope="col">Fecha de Inicio</th>
-									      <th scope="col">Fecha limite</th>
+									      <th scope="col">Tiempo Limite</th>
+									      <th scope="col">Intentos</th>
 									      <th scope="col">Acciones</th>
 									    </tr>
 									  </thead>
@@ -435,4 +438,4 @@ const mapDispatchToProps = {
   DeleteTask
 };
 
-export default connect( mapStateToProps , mapDispatchToProps )(Tasks)
+export default connect( mapStateToProps , mapDispatchToProps )(Evaluations)

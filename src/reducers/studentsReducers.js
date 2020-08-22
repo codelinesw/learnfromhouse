@@ -17,8 +17,14 @@ export default function StudentsReducers(state = initialState, action) {
 	  return {...state,students: state.students} 
 	case 'DELETE_STUDENT':
 	  console.log('id_to_delete ',action.payload);
-	  console.log(state.students);
-	  state.students.splice(action.payload,1);
+	  let newdata = [];
+	  if(Array.isArray(action.payload)){
+	  	 action.payload.map((item, index) => {
+	  	 	state.students.splice(state.students[item.index],1);
+	  	 })
+	  }else{
+	  	state.students.splice(action.payload,1);
+	  }
 	   return {...state,students:state.students}
     default:
       //console.log('default:state',state)
